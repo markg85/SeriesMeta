@@ -24,8 +24,9 @@ function newReturnObject(season = 0, episode = 0, series = '') {
   return obj;
 }
 
-function queryApiService(url) {
+function queryApiService(series) {
   return new Promise((resolve, reject) => {
+    let url = `https://api.tvmaze.com/singlesearch/shows?q=${series}&embed=episodes`
     let options = {
       url: url,
       useragent: 'SeriesMeta',
@@ -38,13 +39,16 @@ function queryApiService(url) {
       if (err || data == '') {
         reject({error: "No valid information found in api service. Url used: " + url})
       } else {
-        resolve(data);
+        let parsedData = JSON.parse(data);
+        cache.set(series, parsedData, 604800); // The number is 1 week in seconds.
+        resolve(parsedData);
       }
       reject("Unable to contact API. Url used:" + url);
     });
   });
 }
 
+// Promisified the cache.get function. If it were promise based, this function could go.
 function getCacheValue(key) {
   return new Promise((resolve, reject) => {
     cache.get(key, (error, value) => {
@@ -56,19 +60,12 @@ function getCacheValue(key) {
 async function getSeries(series) {
   let dataFromCache = await getCacheValue(series);
 
-  if (dataFromCache == null) {
-    let url = `https://api.tvmaze.com/singlesearch/shows?q=${series}&embed=episodes`
-    dataFromCache = await queryApiService(url);
-    console.log('Used API to get DATA');
-
-    if (dataFromCache != null) {
-      dataFromCache = JSON.parse(dataFromCache);
-      cache.set(series, dataFromCache, 604800); // The number is 1 week in seconds.
-    }
-  }
-  
   return new Promise((resolve, reject) => {
-    resolve(dataFromCache);
+    if (dataFromCache != null) {
+      resolve(dataFromCache);
+    } else {
+      resolve(queryApiService(series));
+    }
   });
 }
 
