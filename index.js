@@ -153,7 +153,7 @@ module.exports = {
           }
         }
 
-        // If it's still false of if the season isn't set, set some backup values.
+        // If it's still false the season and episode are not set, set some backup values.
         if (!wantNextOne || obj.season == 0) {
           obj = fillReturnObject(series, null, data);
           obj.season = season;
