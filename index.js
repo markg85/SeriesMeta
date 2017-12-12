@@ -242,7 +242,6 @@ module.exports = {
         let episodes = data._embedded.episodes;
 
         for (let episode of episodes) {
-          console.log(episode.airdate)
           if (date == episode.airdate) {
             obj.push(fillReturnObject(series, episode, data));
           }
