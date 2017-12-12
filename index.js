@@ -259,22 +259,24 @@ module.exports = {
     return new Promise((resolve, reject) => {
       getSeries(series)
       .then((data) => {
-        let obj = newReturnObject(0, 0, series);
+        let obj = [];
         let episodes = data._embedded.episodes;
-        let today = new Date();
+        let today = new Date()
+
+        // As long as we're looking for an episode (and have none), this is false.
+        // If we find one, the next one must match the same date (indicating 2 (or more) episodes on the same date)
+        let matchExactDate = false
+        let exactDate = new Date()
 
         for (let episode of episodes) {
-          let episodeDate = new Date(episode.airdate)
 
-          if (episodeDate >= today) {
-            obj = fillReturnObject(series, episode, data);
-            break;
+          if (new Date(episode.airdate) >= today && matchExactDate == false) {
+            matchExactDate = true;
+            exactDate = new Date(episode.airdate);
+            obj.push(fillReturnObject(series, episode, data));
+          } else if (matchExactDate == true && exactDate.getTime() == new Date(episode.airdate).getTime()) {
+            obj.push(fillReturnObject(series, episode, data));
           }
-        }
-
-        // If nothing was found, use the last episode
-        if (obj.season == 0) {
-          obj = fillReturnObject(series, null, data);
         }
 
         resolve(obj);
