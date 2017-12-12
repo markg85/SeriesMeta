@@ -233,17 +233,16 @@ module.exports = {
     });
   },
 
-  episodesByDate: (series, date) => {
+  // Returns the episode from the given date, defaults to 'today'.
+  episodesByDate: (series, date = new Date().toISOString().substring(0, 10)) => {
     return new Promise((resolve, reject) => {
       getSeries(series)
       .then((data) => {
         let obj = [] 
         let episodes = data._embedded.episodes;
-        let atDate = new Date(date);
 
         for (let episode of episodes) {
-          let episodeDate = new Date(episode.airdate)
-
+          console.log(episode.airdate)
           if (date == episode.airdate) {
             obj.push(fillReturnObject(series, episode, data));
           }
