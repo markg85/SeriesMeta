@@ -181,7 +181,8 @@ Promise.all([SeriesMeta.episodesByDate(series, '2017-12-01'), SeriesMeta.metadat
   console.log(values);  // prints 60 after 2 seconds.
 });
 
-SeriesMeta.episodesByDate('Lucifer')
+
+SeriesMeta.currentEpisode('Lucifer')
 .then((data) => {
   console.log(data)
 })
@@ -195,12 +196,15 @@ SeriesMeta.episodesByDate('Lucifer')
 // The second argument the series name which would internally be passed to the metadata function.
 // That way you only need to provide a very little to get the api output you want + the metadata.
 let ApiWrapper = async (apiFunctionData, series) => {
-  let one = apiFunctionData;
-  let two = SeriesMeta.metadata(series);
-  return [await one, await two]
+  let one = await apiFunctionData;
+  let two = await SeriesMeta.metadata(series);
+  return [one, two];
 };
 
-ApiWrapper(SeriesMeta.episodesByDate(series, '2017-12-01'), series)
+ApiWrapper(SeriesMeta.currentEpisode(series), series)
 .then((values) => {
   console.log(values)
 })
+.catch((error) => {
+  console.log(error)
+});
