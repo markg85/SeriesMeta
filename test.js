@@ -131,7 +131,6 @@ SeriesMeta.whenPremiered('Black Lightning')
   console.log(error)
   console.log('The series you were looking for could not be found.')
 });
-*/
 
 SeriesMeta.episodesByDate('Agents of S.H.I.E.L.D.', '2017-12-01')
 .then((data) => {
@@ -141,3 +140,67 @@ SeriesMeta.episodesByDate('Agents of S.H.I.E.L.D.', '2017-12-01')
   console.log(error)
   console.log('The series you were looking for could not be found.')
 });
+
+SeriesMeta.metadata('Agents of S.H.I.E.L.D.')
+.then((data) => {
+  console.log(data)
+})
+.catch((error) => {
+  console.log(error)
+  console.log('The series you were looking for could not be found.')
+});
+*/
+
+// Example of getting the episodes for today and the metadata with it.
+// With Promises:
+
+let series = 'Agents of S.H.I.E.L.D.';
+
+// Note: this works, but has a downside of calling the backend API twice if it wasn't in the cache yet.
+// It works, but isn't as ideal as it could be.
+/*
+Promise.all([SeriesMeta.episodesByDate(series, '2017-12-01'), SeriesMeta.metadata(series)])
+.then((values) => {
+  console.log(values[0])
+  console.log(values[1])
+})
+.catch((error) => {
+  console.log(error)
+});
+*/
+
+// This version works with calling the backend API just once if it wasn't in the cache yet. The sebsequent call comes from the cache.
+// The await keyword is the key here. It first gets the episodes (and waits for the response) then the metadata (and waits).
+/*
+(async () => {
+  let episodes = await SeriesMeta.episodesByDate(series, '2017-12-01')
+  let meta = await SeriesMeta.metadata(series)
+  return [episodes, meta];
+})(series)
+.then(values => {
+  console.log(values);  // prints 60 after 2 seconds.
+});
+
+SeriesMeta.episodesByDate('Lucifer')
+.then((data) => {
+  console.log(data)
+})
+.catch((error) => {
+  console.log(error)
+  console.log('The series you were looking for could not be found.')
+});
+*/
+
+// Or another example where an api wrapper function is made. The first argument would be the API call.
+// The second argument the series name which would internally be passed to the metadata function.
+// That way you only need to provide a very little to get the api output you want + the metadata.
+let ApiWrapper = async (apiFunctionData, series) => {
+  let one = apiFunctionData;
+  let two = SeriesMeta.metadata(series);
+  return [await one, await two]
+};
+
+ApiWrapper(SeriesMeta.episodesByDate(series, '2017-12-01'), series)
+.then((values) => {
+  console.log(values)
+})
