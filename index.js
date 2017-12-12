@@ -211,7 +211,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       getSeries(series)
       .then((data) => {
-        let obj = null;
+        let obj = [];
         let episodes = data._embedded.episodes.reverse();
         let till = new Date();
         let from = new Date(till);
@@ -238,7 +238,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       getSeries(series)
       .then((data) => {
-        let obj = null;
+        let obj = [];
         let episodes = data._embedded.episodes;
 
         for (let episode of episodes) {
