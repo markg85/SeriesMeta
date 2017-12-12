@@ -325,4 +325,23 @@ module.exports = {
     });
   },
 
+  // This returns an object containing metadata about the current series.
+  metadata: (series) => {
+    return new Promise((resolve, reject) => {
+      getSeries(series)
+      .then((data) => {
+        let meta = {
+          name: data.name,
+          images: data.image,
+          summary: data.summary,
+          imdb: data.externals.imdb
+        }
+        resolve(meta);
+      })
+      .catch((reason) => {
+        reject(reason)
+      });
+    });
+  }
+
 };
