@@ -213,7 +213,7 @@ module.exports = {
       .then((data) => {
         let obj = [] 
         let episodes = data._embedded.episodes.reverse();
-        let till = new Date('2017-12-02');
+        let till = new Date();
         let from = new Date(till);
         from.setDate(from.getDate() - lookbackDays);
 
