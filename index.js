@@ -285,20 +285,29 @@ module.exports = {
     });
   },
   
+  // Get the last aired episode that isn't newer then today.
+  // This could return multiple episodes incase multiple episodes aired on the same date
   whenIsPrevious: (series) => {
     return new Promise((resolve, reject) => {
       getSeries(series)
       .then((data) => {
-        let obj = newReturnObject(0, 0, series);
+        let obj = [];
         let episodes = data._embedded.episodes.reverse();
-        let today = new Date();
+        let today = new Date()
+
+        // As long as we're looking for an episode (and have none), this is false.
+        // If we find one, the next one must match the same date (indicating 2 (or more) episodes on the same date)
+        let matchExactDate = false
+        let exactDate = new Date()
 
         for (let episode of episodes) {
-          let episodeDate = new Date(episode.airdate)
 
-          if (episodeDate < today) {
-            obj = fillReturnObject(series, episode, data);
-            break;
+          if (new Date(episode.airdate) <= today && matchExactDate == false) {
+            matchExactDate = true;
+            exactDate = new Date(episode.airdate);
+            obj.push(fillReturnObject(series, episode, data));
+          } else if (matchExactDate == true && exactDate.getTime() == new Date(episode.airdate).getTime()) {
+            obj.push(fillReturnObject(series, episode, data));
           }
         }
 
