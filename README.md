@@ -11,15 +11,15 @@ This module obviously isn't limited to speech focused tasks, it can be used with
 
 ## Functions
 
-- [isEpisodeAired](#isEpisodeAired)
-- [isSeriesEnded](#isSeriesEnded)
-- [hasNextEpisode](#hasNextEpisode)
-- [hasPreviousEpisode](#hasPreviousEpisode)
-- [currentEpisode](#currentEpisode)
-- [episodesByDate](#episodesByDate)
-- [whenIsNext](#whenIsNext)
-- [whenIsPrevious](#whenIsPrevious)
-- [whenPremiered](#whenPremiered)
+- [isEpisodeAired](#isepisodeaired)
+- [isSeriesEnded](#isseriesended)
+- [hasNextEpisode](#hasnextepisode)
+- [hasPreviousEpisode](#haspreviousepisode)
+- [currentEpisode](#currentepisode)
+- [episodesByDate](#episodesbydate)
+- [whenIsNext](#whenisnext)
+- [whenIsPrevious](#whenisprevious)
+- [whenPremiered](#whenpremiered)
 - [metadata](#metadata)
 
 ## Return object
