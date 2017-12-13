@@ -145,7 +145,7 @@ The parameters:
 
 Example:
 ```js
-let data = await whenIsPrevious('Lucifer');
+let data = await whenPremiered('Lucifer');
 ```
 
 ## metadata
