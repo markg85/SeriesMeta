@@ -167,8 +167,6 @@ This is a bit of an extra function that ruturns the following object:
 }
 ```
 
-The values are pretty self explenatory. The `images` value is an array of images as the come from the **TVMaze** API.
-
 The parameters:
 - series : The series (a string).
 
