@@ -30,6 +30,7 @@ function queryApiService(series) {
     let options = {
       url: url,
       useragent: 'SeriesMeta',
+      compressed: true,
       insecure: true,
       timeout: 5,
       retries: 3
