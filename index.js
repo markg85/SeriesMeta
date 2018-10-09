@@ -205,24 +205,55 @@ module.exports = {
     });
   },
 
-  // This searches for episodes aired on or a few days before today.
-  // Note that this could very likely return multiple episodes, the return is therefore always an array.
-  // The second argument indicated how many days is still considered "current", the default is today - 3 days.
-  currentEpisode: (series, lookbackDays = 3) => {
+  // This searches for the latest day that an episode aired and returns all episodes from that day.
+  // Usually that's 1 episode, but sometimes multiple episodes are aired on one day. The return will
+  // then have multiple episodes in ascending order sorted by date.
+  latestEpisode: (series) => {
     return new Promise((resolve, reject) => {
       getSeries(series)
       .then((data) => {
         let obj = [];
         let episodes = data._embedded.episodes.reverse();
+
+        let previousEpisodeDate = null;
+        let currentDate = new Date()
+
+        for (let episode of episodes) {
+          let episodeAirDate = new Date(episode.airdate);
+
+          if (previousEpisodeDate == null && episodeAirDate <= currentDate) {
+            previousEpisodeDate = episodeAirDate;
+            obj.push(fillReturnObject(series, episode, data));
+          } else if(new Date(episode.airdate) == previousEpisodeDate) {
+            obj.push(fillReturnObject(series, episode, data));
+          }
+        }
+
+        resolve(obj.reverse());
+      })
+      .catch((reason) => {
+        reject(reason)
+      });
+    });
+  },
+
+  // This uses the latestEpisode output but filtered by today - x days (x defaults to 3).
+  // You can modify how many days x would be by adjusting the decons value.
+  // Please do note that 
+  currentEpisode: (series, lookbackDays = 3) => {
+    return new Promise((resolve, reject) => {
+      module.exports.latestEpisode(series)
+      .then((data) => {
+        let obj = [];
         let till = new Date();
         let from = new Date(till);
         from.setDate(from.getDate() - lookbackDays);
 
-        for (let episode of episodes) {
-          let episodeDate = new Date(episode.airdate)
+        for (let episode of data) {
+          let episodeDate = new Date(episode.date)
 
           if (episodeDate <= till && episodeDate >= from) {
-            obj.push(fillReturnObject(series, episode, data));
+            obj.push(episode);
           }
         }
 
@@ -288,38 +319,9 @@ module.exports = {
     });
   },
   
-  // Get the last aired episode that isn't newer then today.
-  // This could return multiple episodes incase multiple episodes aired on the same date
+  // Same as lastEpisode. The logic for that is simpler then this was and the name is more intuitive.
   whenIsPrevious: (series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let obj = [];
-        let episodes = data._embedded.episodes.reverse();
-        let today = new Date()
-
-        // As long as we're looking for an episode (and have none), this is false.
-        // If we find one, the next one must match the same date (indicating 2 (or more) episodes on the same date)
-        let matchExactDate = false
-        let exactDate = new Date()
-
-        for (let episode of episodes) {
-
-          if (new Date(episode.airdate) <= today && matchExactDate == false) {
-            matchExactDate = true;
-            exactDate = new Date(episode.airdate);
-            obj.push(fillReturnObject(series, episode, data));
-          } else if (matchExactDate == true && exactDate.getTime() == new Date(episode.airdate).getTime()) {
-            obj.push(fillReturnObject(series, episode, data));
-          }
-        }
-
-        resolve(obj);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+    return module.exports.latestEpisode(series);
   },
 
   whenPremiered: (series) => {

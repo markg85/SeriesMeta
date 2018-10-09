@@ -16,6 +16,7 @@ This module obviously isn't limited to speech focused tasks, it can be used with
 - [hasNextEpisode](#hasnextepisode)
 - [hasPreviousEpisode](#haspreviousepisode)
 - [currentEpisode](#currentepisode)
+- [latestEpisode](#lastestepisode)
 - [episodesByDate](#episodesbydate)
 - [whenIsNext](#whenisnext)
 - [whenIsPrevious](#whenisprevious)
@@ -98,9 +99,26 @@ The parameters:
 - series : The series (a string).
 - (optional) lookbackDays: A number of days to look back. The number is today - number.
 
+The implementation of this function changed 0.2.0. It now uses `latestEpisode` internally and basically applies a date range filter over the output.
+
 Example:
 ```js
 let data = await currentEpisode('Lucifer');
+```
+
+## latestEpisode
+
+Returns an array of `episodeObject` of the latest aired episode of the given series.
+If in that last aired day multiple episodes aired then it's returned in ascending order sorted by date. Thus the last element in the return array is always the lastest aired episode.
+
+The parameters:
+- series : The series (a string).
+
+The difference between this function and currentEpisode is that this function will always return the last aired episode, however long ago it was.
+
+Example:
+```js
+let data = await latestEpisode('Lucifer');
 ```
 
 ## episodesByDate
@@ -127,6 +145,10 @@ let data = await whenIsNext('Lucifer');
 ```
 
 ## whenIsPrevious
+
+See `latestEpisode` as that does (in a simpler way) what this was doing.
+Also, that function is more intuitive in name.
+This function remains, but it merely an alias to `latestEpisode`.
 
 Returns an array of `episodeObject` based internally based on the current date (not settable). It tries to find the **first** date when the next episode that airs **on** or **before** the current date and returns those. If that date happens to have multiple episodes being aired then those will all be returned.
 The parameters:
@@ -175,4 +197,5 @@ Example:
 let data = await metadata('Lucifer');
 ```
 
-
+# Todo
+* use more precise date calculation. Right now only the date is used, not the time and timezone. This will give more accurate results when requesting episode information.
