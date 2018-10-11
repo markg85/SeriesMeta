@@ -42,6 +42,17 @@ Note that depending on the API call, it will be just this object or an array wit
 I am referring to this in the documentation below as the `episodeObject`.
 
 ---
+## setDefaultTimezone
+
+Sets the default timezone for conversions.
+The parameters:
+- timezone : The timezone (a string) like 'Europe/Amsterdam'
+
+Example:
+```js
+setDefaultTimezone('Europe/Amsterdam')
+```
+
 ## isEpisodeAired
 
 Returns 1 `episodeObject` with the data of the requested episode.  
@@ -54,7 +65,6 @@ Example:
 ```js
 let data = await isEpisodeAired('Lucifer', 1, 10);
 ```
-
 ## isSeriesEnded
 
 Returns 1 `episodeObject` with the last known episode of the requested series.  
