@@ -11,6 +11,7 @@ This module obviously isn't limited to speech focused tasks, it can be used with
 
 ## Functions
 
+- [setDefaultTimezone](#setdefaulttimezone)
 - [isEpisodeAired](#isepisodeaired)
 - [isSeriesEnded](#isseriesended)
 - [hasNextEpisode](#hasnextepisode)
