@@ -32,7 +32,7 @@ When the promise succeeds it will always return the following object:
   episode: 0,
   season: 0,
   series: '',
-  date: '',
+  datetime: '', // As an ISO 8601 string
   ended: false,
   aired: false
 }

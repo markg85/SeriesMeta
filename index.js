@@ -1,6 +1,6 @@
 const curl = require('curlrequest');
 const CachemanFile = require('cacheman-file');
-
+const Moment = require('moment-timezone');
 
 let cacheOptions = {};
 cacheOptions.tmpDir = null
@@ -11,7 +11,7 @@ let returnObject = {
   episode: 0,
   season: 0,
   series: '',
-  date: '',
+  datetime: '',
   ended: false,
   aired: false
 }
@@ -62,24 +62,29 @@ async function getSeries(series) {
   let dataFromCache = await getCacheValue(series);
 
   return new Promise((resolve, reject) => {
+    let data = []
     if (dataFromCache != null) {
-      resolve(dataFromCache);
+      data = dataFromCache;
     } else {
-      resolve(queryApiService(series));
+      data = queryApiService(series);
     }
+
+    for (let episode of data._embedded.episodes) {
+      episode.datetime = Moment(episode.airstamp).tz(module.exports.defaultTimezone);
+    }
+
+    resolve(data);
   });
 }
 
 function fillReturnObject(series, episode, data) {
   let obj = newReturnObject(0, 0, series);
-  
+ 
   if (episode) {
-    obj.date = episode.airdate
     obj.season = episode.season
     obj.episode = episode.number
-
-    let episodeAirDate = new Date(episode.airdate);
-    obj.aired = (episodeAirDate <= new Date())
+    obj.datetime = episode.datetime.toISOString(true)
+    obj.aired = (episode.datetime.add(episode.runtime, 'minutes') <= Moment())
   }
 
   if (data.status == 'Ended') {
@@ -89,7 +94,16 @@ function fillReturnObject(series, episode, data) {
   return obj;
 }
 
+
 module.exports = {
+  
+  // You must call "setDefaultTimezone to apply this, otherwise it's partly in local time and will mess up date calculations.
+  defaultTimezone: "Europe/Amsterdam",
+
+  setDefaultTimezone: (timezone) => {
+    module.exports.defaultTimezone = timezone
+    Moment.tz.setDefault(timezone)
+  },
   
   isEpisodeAired: (season, episode, series) => {
     return new Promise((resolve, reject) => {
@@ -97,9 +111,6 @@ module.exports = {
       .then((data) => {
         let obj = newReturnObject(0, 0, series);
         let episodes = data._embedded.episodes;
-        let today = new Date();
-
-        let lastKnownEpisode = episodes[episodes.length - 1];
 
         // We know for sure that the series contains the requested episode. But did it air?
         for (let epi of episodes) {
@@ -216,15 +227,15 @@ module.exports = {
         let episodes = data._embedded.episodes.reverse();
 
         let previousEpisodeDate = null;
-        let currentDate = new Date()
+        let currentDate = Moment();
 
         for (let episode of episodes) {
-          let episodeAirDate = new Date(episode.airdate);
+          let episodeAirDate = episode.datetime;
 
           if (previousEpisodeDate == null && episodeAirDate <= currentDate) {
             previousEpisodeDate = episodeAirDate;
             obj.push(fillReturnObject(series, episode, data));
-          } else if(new Date(episode.airdate) == previousEpisodeDate) {
+          } else if (episode.datetime == previousEpisodeDate) {
             obj.push(fillReturnObject(series, episode, data));
           }
         }
@@ -245,12 +256,11 @@ module.exports = {
       module.exports.latestEpisode(series)
       .then((data) => {
         let obj = [];
-        let till = new Date();
-        let from = new Date(till);
-        from.setDate(from.getDate() - lookbackDays);
+        let till = Moment();
+        let from = Moment().subtract(lookbackDays, 'days');
 
         for (let episode of data) {
-          let episodeDate = new Date(episode.date)
+          let episodeDate = Moment(episode.datetime)
 
           if (episodeDate <= till && episodeDate >= from) {
             obj.push(episode);
@@ -266,7 +276,7 @@ module.exports = {
   },
 
   // Returns the episode from the given date, defaults to 'today'.
-  episodesByDate: (series, date = new Date().toISOString().substring(0, 10)) => {
+  episodesByDate: (series, date = Moment().format('YYYY-MM-DD')) => {
     return new Promise((resolve, reject) => {
       getSeries(series)
       .then((data) => {
@@ -274,7 +284,7 @@ module.exports = {
         let episodes = data._embedded.episodes;
 
         for (let episode of episodes) {
-          if (date == episode.airdate) {
+          if (date == episode.datetime.format('YYYY-MM-DD')) {
             obj.push(fillReturnObject(series, episode, data));
           }
         }
@@ -293,20 +303,20 @@ module.exports = {
       .then((data) => {
         let obj = [];
         let episodes = data._embedded.episodes;
-        let today = new Date()
+        let today = Moment()
 
         // As long as we're looking for an episode (and have none), this is false.
         // If we find one, the next one must match the same date (indicating 2 (or more) episodes on the same date)
         let matchExactDate = false
-        let exactDate = new Date()
+        let exactDate = null
 
         for (let episode of episodes) {
 
-          if (new Date(episode.airdate) >= today && matchExactDate == false) {
+          if (episode.datetime >= today && matchExactDate == false) {
             matchExactDate = true;
-            exactDate = new Date(episode.airdate);
+            exactDate = episode.datetime;
             obj.push(fillReturnObject(series, episode, data));
-          } else if (matchExactDate == true && exactDate.getTime() == new Date(episode.airdate).getTime()) {
+          } else if (matchExactDate == true && exactDate.format('YYYY-MM-DD') == episode.datetime.format('YYYY-MM-DD')) {
             obj.push(fillReturnObject(series, episode, data));
           }
         }

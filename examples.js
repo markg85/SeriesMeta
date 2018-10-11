@@ -154,7 +154,7 @@ SeriesMeta.metadata('Agents of S.H.I.E.L.D.')
 // Example of getting the episodes for today and the metadata with it.
 // With Promises:
 
-let series = 'Agents of S.H.I.E.L.D.';
+let series = 'Last Week Tonight with John Oliver';
 
 // Note: this works, but has a downside of calling the backend API twice if it wasn't in the cache yet.
 // It works, but isn't as ideal as it could be.
@@ -196,12 +196,13 @@ SeriesMeta.currentEpisode('Lucifer')
 // The second argument the series name which would internally be passed to the metadata function.
 // That way you only need to provide a very little to get the api output you want + the metadata.
 let ApiWrapper = async (apiFunctionData, series) => {
+  SeriesMeta.setDefaultTimezone("Europe/Amsterdam");
   let one = await apiFunctionData;
   let two = await SeriesMeta.metadata(series);
   return [one, two];
 };
 
-ApiWrapper(SeriesMeta.currentEpisode(series), series)
+ApiWrapper(SeriesMeta.episodesByDate(series, '2018-10-08'), series)
 .then((values) => {
   console.log(values)
 })
