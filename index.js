@@ -59,14 +59,16 @@ function getCacheValue(key) {
 }
 
 async function getSeries(series) {
-  let dataFromCache = await getCacheValue(series);
+  let data = await getCacheValue(series);
+  
+  if (!data) {
+    data = await queryApiService(series);
+  }
 
   return new Promise((resolve, reject) => {
-    let data = []
-    if (dataFromCache != null) {
-      data = dataFromCache;
-    } else {
-      data = queryApiService(series);
+    if (!data) {
+      reject('Unable to get data.');
+      return;
     }
 
     for (let episode of data._embedded.episodes) {
