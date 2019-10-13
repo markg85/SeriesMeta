@@ -75,6 +75,11 @@ async function getSeries(series) {
       episode.datetime = Moment(episode.airstamp).tz(module.exports.defaultTimezone);
     }
 
+    // Replace http with https. This API is likely to be used in contexts where https is used anyhow and this would then prevent runtime warnings. 
+    for (let obj in data.image) {
+      data.image[obj] = data.image[obj].replace(/http/i, "https");
+    }
+
     resolve(data);
   });
 }
