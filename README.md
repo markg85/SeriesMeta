@@ -12,6 +12,7 @@ This module obviously isn't limited to speech focused tasks, it can be used with
 ## Functions
 
 - [setDefaultTimezone](#setdefaulttimezone)
+- [imageObjectHandler](#imageobjecthandler)
 - [isEpisodeAired](#isepisodeaired)
 - [isSeriesEnded](#isseriesended)
 - [hasNextEpisode](#hasnextepisode)
@@ -53,6 +54,19 @@ Example:
 ```js
 setDefaultTimezone('Europe/Amsterdam')
 ```
+
+## imageObjectHandler
+
+Sets a function to be used as image object handler as it comes from TVMaze.
+By default it behaves as before (aka, replaces http with https links), but this function allows more fine grained control over images.
+For instance, you can now cache images locally and replace the url's to use your local cached ones.
+The input you get is an object like:
+```js
+{
+  original: 'http://some/url/to/an/image.ext',
+  medium: 'http://some/url/to/an/image.ext',
+}
+``` 
 
 ## isEpisodeAired
 
