@@ -75,10 +75,7 @@ async function getSeries(series) {
       episode.datetime = Moment(episode.airstamp).tz(module.exports.defaultTimezone);
     }
 
-    // Replace http with https. This API is likely to be used in contexts where https is used anyhow and this would then prevent runtime warnings. 
-    for (let obj in data.image) {
-      data.image[obj] = data.image[obj].replace(/http:/i, "https:");
-    }
+    data.image = module.exports.imageObjectHandler(data.image);
 
     resolve(data);
   });
@@ -106,6 +103,16 @@ module.exports = {
   
   // You must call "setDefaultTimezone to apply this, otherwise it's partly in local time and will mess up date calculations.
   defaultTimezone: "Europe/Amsterdam",
+
+  // How to handle images within a response from TVMaze. By default we just take the images but replace http with https.
+  // You get a key -> value object where the key is either 'medium' or 'original' and the value being the link to the image.
+  // If you leave it as is then the urls will be replaced by https ones as that's the contect you likely use this script in.
+  imageObjectHandler: (images) => {
+    for (let obj in images) {
+      images[obj] = images[obj].replace(/http:/i, "https:")
+    }
+    return images;
+  },
 
   setDefaultTimezone: (timezone) => {
     module.exports.defaultTimezone = timezone
