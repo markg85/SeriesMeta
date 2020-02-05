@@ -95,6 +95,12 @@ function fillReturnObject(series, episode, data) {
     obj.ended = true;
   }
 
+  // Use data.name (series name) if the input name does not equal that.
+  // This usually happens when a typo is made in a search query, data.name will return the most accurate name.
+  if (series !== data.name) {
+    obj.series = data.name
+  }
+
   return obj;
 }
 
