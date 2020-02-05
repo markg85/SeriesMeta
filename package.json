@@ -1,6 +1,6 @@
 {
   "name": "seriesmeta",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Node.js module that allows you to query by series name (and by specific episode) to get information about the current state. Like: is the series still airing, is the requested episode aired, etc.",
   "main": "index.js",
   "scripts": {
