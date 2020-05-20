@@ -60,7 +60,7 @@ function getCacheValue(key) {
 
 async function getSeries(series) {
   let data = await getCacheValue(series);
-  
+
   if (!data) {
     data = await queryApiService(series);
   }
@@ -83,7 +83,7 @@ async function getSeries(series) {
 
 function fillReturnObject(series, episode, data) {
   let obj = newReturnObject(0, 0, series);
- 
+
   if (episode) {
     obj.season = episode.season
     obj.episode = episode.number
@@ -106,7 +106,7 @@ function fillReturnObject(series, episode, data) {
 
 
 module.exports = {
-  
+
   // You must call "setDefaultTimezone to apply this, otherwise it's partly in local time and will mess up date calculations.
   defaultTimezone: "Europe/Amsterdam",
 
@@ -124,7 +124,7 @@ module.exports = {
     module.exports.defaultTimezone = timezone
     Moment.tz.setDefault(timezone)
   },
-  
+
   isEpisodeAired: (season, episode, series) => {
     return new Promise((resolve, reject) => {
       getSeries(series)
@@ -270,7 +270,7 @@ module.exports = {
 
   // This uses the latestEpisode output but filtered by today - x days (x defaults to 3).
   // You can modify how many days x would be by adjusting the decons value.
-  // Please do note that 
+  // Please do note that
   currentEpisode: (series, lookbackDays = 3) => {
     return new Promise((resolve, reject) => {
       module.exports.latestEpisode(series)
@@ -348,7 +348,7 @@ module.exports = {
       });
     });
   },
-  
+
   // Same as lastEpisode. The logic for that is simpler then this was and the name is more intuitive.
   whenIsPrevious: (series) => {
     return module.exports.latestEpisode(series);
@@ -379,6 +379,20 @@ module.exports = {
           imdb: data.externals.imdb
         }
         resolve(meta);
+      })
+      .catch((reason) => {
+        reject(reason)
+      });
+    });
+  },
+
+  // This return an array containing all the episodes metadata
+  allEpisodes: (series) => {
+    return new Promise((resolve, reject) => {
+      getSeries(series)
+      .then((data) => {
+        let episodes = data._embedded.episodes;
+        resolve(episodes);
       })
       .catch((reason) => {
         reject(reason)

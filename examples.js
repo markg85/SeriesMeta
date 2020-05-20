@@ -190,6 +190,15 @@ SeriesMeta.currentEpisode('Lucifer')
   console.log(error)
   console.log('The series you were looking for could not be found.')
 });
+
+SeriesMeta.allEpisodes('Lucifer')
+.then((data) => {
+  console.log(data)
+})
+.catch((error) => {
+  console.log(error)
+  console.log('The series you were looking for could not be found.')
+});
 */
 
 // Or another example where an api wrapper function is made. The first argument would be the API call.

@@ -24,6 +24,7 @@ This module obviously isn't limited to speech focused tasks, it can be used with
 - [whenIsPrevious](#whenisprevious)
 - [whenPremiered](#whenpremiered)
 - [metadata](#metadata)
+- [allEpisodes](#allepisodes)
 
 ## Return object
 Each API call returns a promise.
@@ -38,7 +39,7 @@ When the promise succeeds it will always return the following object:
   ended: false,
   aired: false
 }
-``` 
+```
 
 Note that depending on the API call, it will be just this object or an array with 1 or more of these objects in them.
 I am referring to this in the documentation below as the `episodeObject`.
@@ -66,7 +67,7 @@ The input you get is an object like:
   original: 'http://some/url/to/an/image.ext',
   medium: 'http://some/url/to/an/image.ext',
 }
-``` 
+```
 
 ## isEpisodeAired
 
@@ -197,18 +198,18 @@ let data = await whenPremiered('Lucifer');
 
 ## metadata
 
-This is a bit of an extra function that ruturns the following object:
+This is a bit of an extra function that returns the following object:
 ```js
 {
   // Series name, usually the same you provide.
   name,
-  
+
   // An array of images urls from the TVMaze API.
   images,
-  
+
   // The series description.
   summary,
-  
+
   // The tt0000000 iMDB ID for the series.
   imdb
 }
@@ -220,6 +221,49 @@ The parameters:
 Example:
 ```js
 let data = await metadata('Lucifer');
+```
+
+## allEpisodes
+
+This is a function that returns all the episodes of a serie as the following object in an array:
+```js
+{
+  // Id of the episode.
+  id,
+  // Url of the episode 'http://www.tvmaze.com/episodes/{id}/{name}'.
+  url,
+  // Name of the episode.
+  name,
+  // N° of the season.
+  season,
+  // N° of the episode.
+  number,
+  // Air date
+  airdate,
+  // Hour of diffusion.
+  airtime,
+  // Date and time of the broadcast.
+  airstamp,
+  // Length of the episode
+  runtime,
+  // Link of an image
+  image,
+  // Summary of the episode
+  summary,
+  // api link.
+  _links: { self: { href: 'http://api.tvmaze.com/episodes/1775970' } },
+  // Datetime as a Moment<2020-02-18T13:00:00+01:00>.
+  datetime
+}
+
+```
+
+The parameters:
+- series : The series (a string).
+
+Example:
+```js
+let data = await allEpisodes('Lucifer');
 ```
 
 # Todo
