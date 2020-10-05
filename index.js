@@ -27,6 +27,7 @@ function newReturnObject(season = 0, episode = 0, series = '') {
 function queryApiService(series) {
   return new Promise((resolve, reject) => {
     let url = `https://api.tvmaze.com/singlesearch/shows?q=${series}&embed=episodes`
+
     let options = {
       url: url,
       useragent: 'SeriesMeta',
@@ -42,6 +43,9 @@ function queryApiService(series) {
       } else {
         let parsedData = JSON.parse(data);
         cache.set(series, parsedData, 604800); // The number is 1 week in seconds.
+        // We add a second value, this is with the IMDB ID. It merely stores the name by which to find the actual data.
+        // The function to get data from the cache will handle this.
+        cache.set(parsedData.externals.imdb, { redirect: true, series}, 604800); // The number is 1 week in seconds.
         resolve(parsedData);
       }
       reject("Unable to contact API. Url used:" + url);
@@ -63,6 +67,11 @@ async function getSeries(series) {
 
   if (!data) {
     data = await queryApiService(series);
+  } else {
+    let matchResult = series.match(/^((t{2})?(\d{7}))$/i);
+    if (matchResult != null && matchResult.length >= 3 && 'redirect' in data) {
+      data = await getCacheValue(data.series);
+    }
   }
 
   return new Promise((resolve, reject) => {
