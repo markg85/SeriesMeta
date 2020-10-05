@@ -19,6 +19,6 @@
   "dependencies": {
     "cacheman-file": "^0.2.1",
     "curlrequest": "^1.0.1",
-    "moment-timezone": "^0.5.21"
+    "moment-timezone": "^0.5.31"
   }
 }
