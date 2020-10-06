@@ -4,7 +4,7 @@
   "description": "Node.js module that allows you to query by series name (and by specific episode) to get information about the current state. Like: is the series still airing, is the requested episode aired, etc.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "postversion": "git push && git push --tags && npm publish"
   },
   "repository": {
     "type": "git",
