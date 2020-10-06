@@ -98,8 +98,6 @@ async function getSeries(series) {
       return;
     }
 
-    console.log(data)
-
     for (let episode of data._embedded.episodes) {
       episode.datetime = Moment(episode.airstamp).tz(module.exports.defaultTimezone);
     }
