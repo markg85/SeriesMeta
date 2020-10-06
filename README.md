@@ -30,6 +30,8 @@ This module obviously isn't limited to speech focused tasks, it can be used with
 The `series` value in all of the functions can now be an IMDB ID as well. Note that this IMDB ID needs to be provided in this format: `tt1234567`.
 The caching internally still caches series by their name. Additionally, it adds a "cache mapping" from the IMDB ID to that name. This guarantees that searching for a series by either the name or IMDB ID results in the cache entry for both to be created. Any subsequent call with either that same name or IMDB ID will then come from the cache.
 
+Do note that the search by IMDB ID itself is costing more API calls to TVMaze. They decided to promote API calls when you do a single search (so by name) or when looking up a series by the ID directly (that being their TVMaze ID). When using IMDB ID's it counts as a call to that endpoint + a redirect + the actual data (so 3 API calls). Looking up be series name is still just 1 call.
+
 ## Return object
 Each API call returns a promise.
 When the promise fails, it returns a reason for why it failed. It might contain more information.
