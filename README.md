@@ -26,6 +26,10 @@ This module obviously isn't limited to speech focused tasks, it can be used with
 - [metadata](#metadata)
 - [allEpisodes](#allepisodes)
 
+## New in 0.3.0
+The `series` value in all of the functions can now be an IMDB ID as well. Note that this IMDB ID needs to be provided in this format: `tt1234567`.
+The caching internally still caches series by their name. Additionally, it adds a "cache mapping" from the IMDB ID to that name. This guarantees that searching for a series by either the name or IMDB ID results in the cache entry for both to be created. Any subsequent call with either that same name or IMDB ID will then come from the cache.
+
 ## Return object
 Each API call returns a promise.
 When the promise fails, it returns a reason for why it failed. It might contain more information.
