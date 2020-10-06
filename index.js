@@ -71,7 +71,10 @@ async function getSeries(series) {
   if (!data) {
     if (fromImdbID) {
       try {
+        // Get the IMDB ID data. This is 2 API calls. The URL itself is a redirect (which curl follows).
         dataForId = await curlReq(`https://api.tvmaze.com/lookup/shows?imdb=${seriesLower}`);
+        
+        // Get the actual data we were looking for (3rd API call)
         data = await curlReq(`https://api.tvmaze.com/shows/${dataForId.id}?embed=episodes`);
       } catch (error) {
         return Promise.reject(`Failed to get data by IMDB ID for: ${seriesLower}`)
