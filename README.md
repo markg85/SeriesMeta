@@ -69,6 +69,9 @@ The input you get is an object like:
 }
 ```
 
+You just need to return an array that, at the very least, contains the same keys (`original` and `medium`) with their valies being an url to an image.
+For example, you can use this mechanism to download images, process them and return the processed images instead.
+
 ## isEpisodeAired
 
 Returns 1 `episodeObject` with the data of the requested episode.  
