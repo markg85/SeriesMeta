@@ -285,25 +285,22 @@ module.exports = {
   // Please do note that
   currentEpisode: async (series, lookbackDays = 3) => {
     try {
-      let data = await module.exports.latestEpisode(series)
-      let obj = [];
-      let till = Moment();
-      let from = Moment().subtract(lookbackDays, 'days');
+      let data = await getSeries(series);
+      let allEpisodes = await module.exports.allEpisodes(series)
+      let end = Moment();
+      let start = Moment().subtract(lookbackDays, 'days');
 
-      for (let episode of data) {
-        let episodeDate = Moment(episode.datetime)
-
-        if (episodeDate <= till && episodeDate >= from) {
-          obj.push(episode);
-        }
-      }
-
-      return Promise.resolve(obj);
+      let obj = allEpisodes.filter(item => {
+        let date = new Date(item.datetime);
+        return date >= start && date <= end;
+      });
+     
+      return Promise.resolve(obj.map(item => { return fillReturnObject(series, item, data) }));
     } catch (error) {
       return Promise.reject(error)
     }
   },
-  
+
   // Returns the episode from the given date, defaults to 'today'.
   episodesByDate: async (series, date = Moment().format('YYYY-MM-DD')) => {
     try {
