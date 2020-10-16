@@ -189,27 +189,20 @@ module.exports = {
   hasNextEpisode: async (season, episode, series) => {
     try {
       let data = await getSeries(series)
-      let obj = newReturnObject(0, 0, series);
+      let obj = [];
       let episodes = data._embedded.episodes;
 
-      let wantNextOne = false;
-      for (let epi of episodes) {
-        if (wantNextOne) {
-          // This is the one we're looking for!
-          obj = fillReturnObject(series, epi, data);
-          break;
-        }
+      let index = episodes.findIndex((epi) => {
+        return epi.season == season && epi.number == episode;
+      });
 
-        if (epi.season == season && epi.number == episode) {
-          wantNextOne = true;
-        }
-      }
-
-      // If it's still false the season and episode are not set, set some backup values.
-      if (!wantNextOne || obj.season == 0) {
+      // If it's still false of if the season isn't set, set some backup values.
+      if ((index + 1) > episodes.length || index < 0) {
         obj = fillReturnObject(series, null, data);
         obj.season = season;
         obj.episode = episode;
+      } else {
+        obj = fillReturnObject(series, episodes[index + 1], data);
       }
 
       return Promise.resolve(obj);
@@ -222,27 +215,20 @@ module.exports = {
   hasPreviousEpisode: async (season, episode, series) => {
     try {
       let data = await getSeries(series)
-      let obj = newReturnObject(0, 0, series);
-      let episodes = data._embedded.episodes.reverse();
+      let obj = [];
+      let episodes = data._embedded.episodes;
 
-      let wantNextOne = false;
-      for (let epi of episodes) {
-        if (wantNextOne) {
-          // This is the one we're looking for!
-          obj = fillReturnObject(series, epi, data);
-          break;
-        }
-
-        if (epi.season == season && epi.number == episode) {
-          wantNextOne = true;
-        }
-      }
+      let index = episodes.findIndex((epi) => {
+        return epi.season == season && epi.number == episode;
+      });
 
       // If it's still false of if the season isn't set, set some backup values.
-      if (!wantNextOne || obj.season == 0) {
+      if ((index - 1) < 0) {
         obj = fillReturnObject(series, null, data);
         obj.season = season;
         obj.episode = episode;
+      } else {
+        obj = fillReturnObject(series, episodes[index - 1], data);
       }
 
       return Promise.resolve(obj);
