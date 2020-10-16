@@ -170,7 +170,7 @@ let data = await episodesByDate('Lucifer');
 
 ## whenIsNext
 
-Returns an array of `episodeObject` based internally based on the current date (not settable). It tries to find the **first** date when the next episode that airs **on** or **after** the current date and returns those. If that date happens to have multiple episodes being aired then those will all be returned.
+Returns an array of `episodeObject` based internally on the current date (not settable). It tries to find the **first** date for the next episode that airs **on** or **after** the current date and returns those. If that date happens to have multiple episodes being aired then those will all be returned.
 The parameters:
 - series : The series (a string).
 
