@@ -152,279 +152,246 @@ module.exports = {
     Moment.tz.setDefault(timezone)
   },
 
-  isEpisodeAired: (season, episode, series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let obj = newReturnObject(0, 0, series);
-        let episodes = data._embedded.episodes;
+  isEpisodeAired: async (season, episode, series) => {
+    try {
+      let data = await getSeries(series)
+      let obj = newReturnObject(0, 0, series);
+      let episodes = data._embedded.episodes;
 
-        // We know for sure that the series contains the requested episode. But did it air?
-        for (let epi of episodes) {
-          if (epi.season == season && epi.number == episode) {
-            obj = fillReturnObject(series, epi, data);
-            break;
-          }
+      // We know for sure that the series contains the requested episode. But did it air?
+      for (let epi of episodes) {
+        if (epi.season == season && epi.number == episode) {
+          obj = fillReturnObject(series, epi, data);
+          break;
         }
+      }
 
-        resolve(obj);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+      return Promise.resolve(obj);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
-  isSeriesEnded: (series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let episodes = data._embedded.episodes;
-        let lastEpisode = episodes[episodes.length - 1]
-        let obj = fillReturnObject(series, lastEpisode, data);
+  isSeriesEnded: async (series) => {
+    try {
+      let data = await getSeries(series)
+      let episodes = data._embedded.episodes;
+      let lastEpisode = episodes[episodes.length - 1]
+      let obj = fillReturnObject(series, lastEpisode, data);
 
-        resolve(obj);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+      return Promise.resolve(obj);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
   // Tries to figure out if there is a new episode after the one you provided.
-  hasNextEpisode: (season, episode, series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let obj = newReturnObject(0, 0, series);
-        let episodes = data._embedded.episodes;
+  hasNextEpisode: async (season, episode, series) => {
+    try {
+      let data = await getSeries(series)
+      let obj = newReturnObject(0, 0, series);
+      let episodes = data._embedded.episodes;
 
-        let wantNextOne = false;
-        for (let epi of episodes) {
-          if (wantNextOne) {
-            // This is the one we're looking for!
-            obj = fillReturnObject(series, epi, data);
-            break;
-          }
-
-          if (epi.season == season && epi.number == episode) {
-            wantNextOne = true;
-          }
+      let wantNextOne = false;
+      for (let epi of episodes) {
+        if (wantNextOne) {
+          // This is the one we're looking for!
+          obj = fillReturnObject(series, epi, data);
+          break;
         }
 
-        // If it's still false the season and episode are not set, set some backup values.
-        if (!wantNextOne || obj.season == 0) {
-          obj = fillReturnObject(series, null, data);
-          obj.season = season;
-          obj.episode = episode;
+        if (epi.season == season && epi.number == episode) {
+          wantNextOne = true;
         }
+      }
 
-        resolve(obj);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+      // If it's still false the season and episode are not set, set some backup values.
+      if (!wantNextOne || obj.season == 0) {
+        obj = fillReturnObject(series, null, data);
+        obj.season = season;
+        obj.episode = episode;
+      }
+
+      return Promise.resolve(obj);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
   // Tries to figure out if there is a previous episode before the one you provided
-  hasPreviousEpisode: (season, episode, series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let obj = newReturnObject(0, 0, series);
-        let episodes = data._embedded.episodes.reverse();
+  hasPreviousEpisode: async (season, episode, series) => {
+    try {
+      let data = await getSeries(series)
+      let obj = newReturnObject(0, 0, series);
+      let episodes = data._embedded.episodes.reverse();
 
-        let wantNextOne = false;
-        for (let epi of episodes) {
-          if (wantNextOne) {
-            // This is the one we're looking for!
-            obj = fillReturnObject(series, epi, data);
-            break;
-          }
-
-          if (epi.season == season && epi.number == episode) {
-            wantNextOne = true;
-          }
+      let wantNextOne = false;
+      for (let epi of episodes) {
+        if (wantNextOne) {
+          // This is the one we're looking for!
+          obj = fillReturnObject(series, epi, data);
+          break;
         }
 
-        // If it's still false of if the season isn't set, set some backup values.
-        if (!wantNextOne || obj.season == 0) {
-          obj = fillReturnObject(series, null, data);
-          obj.season = season;
-          obj.episode = episode;
+        if (epi.season == season && epi.number == episode) {
+          wantNextOne = true;
         }
+      }
 
-        resolve(obj);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+      // If it's still false of if the season isn't set, set some backup values.
+      if (!wantNextOne || obj.season == 0) {
+        obj = fillReturnObject(series, null, data);
+        obj.season = season;
+        obj.episode = episode;
+      }
+
+      return Promise.resolve(obj);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
   // This searches for the latest day that an episode aired and returns all episodes from that day.
   // Usually that's 1 episode, but sometimes multiple episodes are aired on one day. The return will
   // then have multiple episodes in ascending order sorted by date.
-  latestEpisode: (series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let obj = [];
-        let episodes = data._embedded.episodes.reverse();
+  latestEpisode: async (series) => {
+    try {
+      let data = await getSeries(series)
+      let obj = [];
+      let episodes = data._embedded.episodes.reverse();
 
-        let previousEpisodeDate = null;
-        let currentDate = Moment();
+      let previousEpisodeDate = null;
+      let currentDate = Moment();
 
-        for (let episode of episodes) {
-          let episodeAirDate = episode.datetime;
+      for (let episode of episodes) {
+        let episodeAirDate = episode.datetime;
 
-          if (previousEpisodeDate == null && episodeAirDate <= currentDate) {
-            previousEpisodeDate = episodeAirDate;
-            obj.push(fillReturnObject(series, episode, data));
-          } else if (episode.datetime == previousEpisodeDate) {
-            obj.push(fillReturnObject(series, episode, data));
-          }
+        if (previousEpisodeDate == null && episodeAirDate <= currentDate) {
+          previousEpisodeDate = episodeAirDate;
+          obj.push(fillReturnObject(series, episode, data));
+        } else if (episode.datetime == previousEpisodeDate) {
+          obj.push(fillReturnObject(series, episode, data));
         }
+      }
 
-        resolve(obj.reverse());
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+      return Promise.resolve(obj.reverse());
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
   // This uses the latestEpisode output but filtered by today - x days (x defaults to 3).
   // You can modify how many days x would be by adjusting the decons value.
   // Please do note that
-  currentEpisode: (series, lookbackDays = 3) => {
-    return new Promise((resolve, reject) => {
-      module.exports.latestEpisode(series)
-      .then((data) => {
-        let obj = [];
-        let till = Moment();
-        let from = Moment().subtract(lookbackDays, 'days');
+  currentEpisode: async (series, lookbackDays = 3) => {
+    try {
+      let data = await module.exports.latestEpisode(series)
+      let obj = [];
+      let till = Moment();
+      let from = Moment().subtract(lookbackDays, 'days');
 
-        for (let episode of data) {
-          let episodeDate = Moment(episode.datetime)
+      for (let episode of data) {
+        let episodeDate = Moment(episode.datetime)
 
-          if (episodeDate <= till && episodeDate >= from) {
-            obj.push(episode);
-          }
+        if (episodeDate <= till && episodeDate >= from) {
+          obj.push(episode);
         }
+      }
 
-        resolve(obj);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+      return Promise.resolve(obj);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
-
+  
   // Returns the episode from the given date, defaults to 'today'.
-  episodesByDate: (series, date = Moment().format('YYYY-MM-DD')) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let obj = [];
-        let episodes = data._embedded.episodes;
+  episodesByDate: async (series, date = Moment().format('YYYY-MM-DD')) => {
+    try {
+      let data = await getSeries(series)
+      let obj = [];
+      let episodes = data._embedded.episodes;
 
-        for (let episode of episodes) {
-          if (date == episode.datetime.format('YYYY-MM-DD')) {
-            obj.push(fillReturnObject(series, episode, data));
-          }
+      for (let episode of episodes) {
+        if (date == episode.datetime.format('YYYY-MM-DD')) {
+          obj.push(fillReturnObject(series, episode, data));
         }
+      }
 
-        resolve(obj);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+      return Promise.resolve(obj);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
-  whenIsNext: (series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let obj = [];
-        let episodes = data._embedded.episodes;
-        let today = Moment()
+  whenIsNext: async (series) => {
+    try {
+      let data = await getSeries(series)
+      let obj = [];
+      let episodes = data._embedded.episodes;
+      let today = Moment()
 
-        // As long as we're looking for an episode (and have none), this is false.
-        // If we find one, the next one must match the same date (indicating 2 (or more) episodes on the same date)
-        let matchExactDate = false
-        let exactDate = null
+      // As long as we're looking for an episode (and have none), this is false.
+      // If we find one, the next one must match the same date (indicating 2 (or more) episodes on the same date)
+      let matchExactDate = false
+      let exactDate = null
 
-        for (let episode of episodes) {
+      for (let episode of episodes) {
 
-          if (episode.datetime >= today && matchExactDate == false) {
-            matchExactDate = true;
-            exactDate = episode.datetime;
-            obj.push(fillReturnObject(series, episode, data));
-          } else if (matchExactDate == true && exactDate.format('YYYY-MM-DD') == episode.datetime.format('YYYY-MM-DD')) {
-            obj.push(fillReturnObject(series, episode, data));
-          }
+        if (episode.datetime >= today && matchExactDate == false) {
+          matchExactDate = true;
+          exactDate = episode.datetime;
+          obj.push(fillReturnObject(series, episode, data));
+        } else if (matchExactDate == true && exactDate.format('YYYY-MM-DD') == episode.datetime.format('YYYY-MM-DD')) {
+          obj.push(fillReturnObject(series, episode, data));
         }
+      }
 
-        resolve(obj);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+      return Promise.resolve(obj);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
   // Same as lastEpisode. The logic for that is simpler then this was and the name is more intuitive.
-  whenIsPrevious: (series) => {
+  whenIsPrevious: async (series) => {
     return module.exports.latestEpisode(series);
   },
 
-  whenPremiered: (series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let firstEpisode = data._embedded.episodes[0];
-        resolve(fillReturnObject(series, firstEpisode, data));
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+  whenPremiered: async (series) => {
+    try {
+      let data = await getSeries(series)
+      let firstEpisode = data._embedded.episodes[0];
+      return Promise.resolve(fillReturnObject(series, firstEpisode, data));
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
   // This returns an object containing metadata about the current series.
-  metadata: (series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let meta = {
-          name: data.name,
-          images: data.image,
-          summary: data.summary,
-          imdb: data.externals.imdb
-        }
-        resolve(meta);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+  metadata: async (series) => {
+    try {
+      let data = await getSeries(series)
+      let meta = {
+        name: data.name,
+        images: data.image,
+        summary: data.summary,
+        imdb: data.externals.imdb
+      }
+      return Promise.resolve(meta);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   },
 
   // This return an array containing all the episodes metadata
-  allEpisodes: (series) => {
-    return new Promise((resolve, reject) => {
-      getSeries(series)
-      .then((data) => {
-        let episodes = data._embedded.episodes;
-        resolve(episodes);
-      })
-      .catch((reason) => {
-        reject(reason)
-      });
-    });
+  allEpisodes: async (series) => {
+    try {
+      let data = await getSeries(series);
+      let episodes = data._embedded.episodes;
+      return Promise.resolve(episodes);
+    } catch (error) {
+      return Promise.reject(error)
+    }
   }
 
 };
