@@ -243,32 +243,26 @@ module.exports = {
   latestEpisode: async (series) => {
     try {
       let data = await getSeries(series)
-      let obj = [];
       let episodes = data._embedded.episodes.reverse();
 
-      let previousEpisodeDate = null;
-      let currentDate = Moment();
+      let index = episodes.findIndex((epi) => {
+        return Moment(epi.datetime) <= Moment();
+      });
 
-      for (let episode of episodes) {
-        let episodeAirDate = episode.datetime;
-
-        if (previousEpisodeDate == null && episodeAirDate <= currentDate) {
-          previousEpisodeDate = episodeAirDate;
-          obj.push(fillReturnObject(series, episode, data));
-        } else if (episode.datetime == previousEpisodeDate) {
-          obj.push(fillReturnObject(series, episode, data));
-        }
+      if (index < 0) {
+        return Promise.resolve(fillReturnObject(series, 0, data));
+      } else {
+        let obj = await module.exports.episodesByDate(series, Moment(episodes[index].datetime).format('YYYY-MM-DD'))
+        return Promise.resolve(obj.reverse())
       }
-
-      return Promise.resolve(obj.reverse());
     } catch (error) {
       return Promise.reject(error)
     }
   },
 
-  // This uses the latestEpisode output but filtered by today - x days (x defaults to 3).
-  // You can modify how many days x would be by adjusting the decons value.
-  // Please do note that
+  // This is comparable to "latestEpisode" but with a bigger date margin. An episode is considered the "latest"
+  // if it was aired within the number of days defined in lookbackDays (3 by default). The difference here is that
+  // currentEpisode will not return any if it's not within the lookback days. latestEpisode will always return the latest aired one.
   currentEpisode: async (series, lookbackDays = 3) => {
     try {
       let data = await getSeries(series);
@@ -279,9 +273,11 @@ module.exports = {
       let obj = allEpisodes.filter(item => {
         let date = new Date(item.datetime);
         return date >= start && date <= end;
+      }).map(item => {
+        return fillReturnObject(series, item, data)
       });
      
-      return Promise.resolve(obj.map(item => { return fillReturnObject(series, item, data) }));
+      return Promise.resolve(obj);
     } catch (error) {
       return Promise.reject(error)
     }
@@ -291,14 +287,13 @@ module.exports = {
   episodesByDate: async (series, date = Moment().format('YYYY-MM-DD')) => {
     try {
       let data = await getSeries(series)
-      let obj = [];
       let episodes = data._embedded.episodes;
 
-      for (let episode of episodes) {
-        if (date == episode.datetime.format('YYYY-MM-DD')) {
-          obj.push(fillReturnObject(series, episode, data));
-        }
-      }
+      let obj = episodes.filter(item => {
+        return date == item.datetime.format('YYYY-MM-DD');
+      }).map(item => {
+        return fillReturnObject(series, item, data)
+      });
 
       return Promise.resolve(obj);
     } catch (error) {
@@ -309,27 +304,18 @@ module.exports = {
   whenIsNext: async (series) => {
     try {
       let data = await getSeries(series)
-      let obj = [];
       let episodes = data._embedded.episodes;
-      let today = Moment()
 
-      // As long as we're looking for an episode (and have none), this is false.
-      // If we find one, the next one must match the same date (indicating 2 (or more) episodes on the same date)
-      let matchExactDate = false
-      let exactDate = null
+      let index = episodes.findIndex((epi) => {
+        return Moment(epi.datetime) >= Moment();
+      });
 
-      for (let episode of episodes) {
-
-        if (episode.datetime >= today && matchExactDate == false) {
-          matchExactDate = true;
-          exactDate = episode.datetime;
-          obj.push(fillReturnObject(series, episode, data));
-        } else if (matchExactDate == true && exactDate.format('YYYY-MM-DD') == episode.datetime.format('YYYY-MM-DD')) {
-          obj.push(fillReturnObject(series, episode, data));
-        }
+      if (index < 0) {
+        return Promise.resolve(fillReturnObject(series, 0, data));
+      } else {
+        let obj = await module.exports.episodesByDate(series, Moment(episodes[index].datetime).format('YYYY-MM-DD'))
+        return Promise.resolve(obj.reverse())
       }
-
-      return Promise.resolve(obj);
     } catch (error) {
       return Promise.reject(error)
     }
@@ -376,5 +362,4 @@ module.exports = {
       return Promise.reject(error)
     }
   }
-
 };
