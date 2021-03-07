@@ -64,7 +64,7 @@ function getCacheValue(key) {
 async function getSeries(series) {
   let seriesLower = series.toLowerCase().replace('&', 'and')
   let data = await getCacheValue(seriesLower);
-  let matchResult = seriesLower.match(/^(t{2}\d{7})$/ig);
+  let matchResult = seriesLower.match(/^(t{2}\d{7,8})$/ig);
   let fromImdbID = matchResult?.[0];
 
   if (!data) {
