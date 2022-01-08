@@ -27,7 +27,7 @@ function newReturnObject(season = 0, episode = 0, series = '') {
 function curlReq(url, extraOptions = {}) {
   return new Promise((resolve, reject) => {
     let options = {
-      url: url,
+      url: encodeURI(url),
       useragent: 'SeriesMeta',
       compressed: true,
       insecure: true,
