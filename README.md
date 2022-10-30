@@ -24,6 +24,13 @@ This module obviously isn't limited to speech focused tasks, it can be used with
 - [whenIsPrevious](#whenisprevious)
 - [whenPremiered](#whenpremiered)
 - [metadata](#metadata)
+- [allEpisodes](#allepisodes)
+
+## New in 0.3.0
+The `series` value in all of the functions can now be an IMDB ID as well. Note that this IMDB ID needs to be provided in this format: `tt1234567`.
+The caching internally still caches series by their name. Additionally, it adds a "cache mapping" from the IMDB ID to that name. This guarantees that searching for a series by either the name or IMDB ID results in the cache entry for both to be created. Any subsequent call with either that same name or IMDB ID will then come from the cache.
+
+Do note that the search by IMDB ID itself is costing more API calls to TVMaze. They decided to promote API calls when you do a single search (so by name) or when looking up a series by the ID directly (that being their TVMaze ID). When using IMDB ID's it counts as a call to that endpoint + a redirect + the actual data (so 3 API calls). Looking up be series name is still just 1 call.
 
 ## Return object
 Each API call returns a promise.
@@ -38,7 +45,7 @@ When the promise succeeds it will always return the following object:
   ended: false,
   aired: false
 }
-``` 
+```
 
 Note that depending on the API call, it will be just this object or an array with 1 or more of these objects in them.
 I am referring to this in the documentation below as the `episodeObject`.
@@ -66,7 +73,10 @@ The input you get is an object like:
   original: 'http://some/url/to/an/image.ext',
   medium: 'http://some/url/to/an/image.ext',
 }
-``` 
+```
+
+You just need to return an array that, at the very least, contains the same keys (`original` and `medium`) with their valies being an url to an image.
+For example, you can use this mechanism to download images, process them and return the processed images instead.
 
 ## isEpisodeAired
 
@@ -160,7 +170,7 @@ let data = await episodesByDate('Lucifer');
 
 ## whenIsNext
 
-Returns an array of `episodeObject` based internally based on the current date (not settable). It tries to find the **first** date when the next episode that airs **on** or **after** the current date and returns those. If that date happens to have multiple episodes being aired then those will all be returned.
+Returns an array of `episodeObject` based internally on the current date (not settable). It tries to find the **first** date for the next episode that airs **on** or **after** the current date and returns those. If that date happens to have multiple episodes being aired then those will all be returned.
 The parameters:
 - series : The series (a string).
 
@@ -197,18 +207,18 @@ let data = await whenPremiered('Lucifer');
 
 ## metadata
 
-This is a bit of an extra function that ruturns the following object:
+This is a bit of an extra function that returns the following object:
 ```js
 {
   // Series name, usually the same you provide.
   name,
-  
+
   // An array of images urls from the TVMaze API.
   images,
-  
+
   // The series description.
   summary,
-  
+
   // The tt0000000 iMDB ID for the series.
   imdb
 }
@@ -220,6 +230,49 @@ The parameters:
 Example:
 ```js
 let data = await metadata('Lucifer');
+```
+
+## allEpisodes
+
+This is a function that returns all the episodes of a serie as the following object in an array:
+```js
+{
+  // Id of the episode.
+  id,
+  // Url of the episode 'http://www.tvmaze.com/episodes/{id}/{name}'.
+  url,
+  // Name of the episode.
+  name,
+  // N° of the season.
+  season,
+  // N° of the episode.
+  number,
+  // Air date
+  airdate,
+  // Hour of diffusion.
+  airtime,
+  // Date and time of the broadcast.
+  airstamp,
+  // Length of the episode
+  runtime,
+  // Link of an image
+  image,
+  // Summary of the episode
+  summary,
+  // api link.
+  _links: { self: { href: 'http://api.tvmaze.com/episodes/1775970' } },
+  // Datetime as a Moment<2020-02-18T13:00:00+01:00>.
+  datetime
+}
+
+```
+
+The parameters:
+- series : The series (a string).
+
+Example:
+```js
+let data = await allEpisodes('Lucifer');
 ```
 
 # Todo
