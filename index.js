@@ -24,7 +24,7 @@ function newReturnObject(season = 0, episode = 0, series = "") {
   return obj;
 }
 
-function curlReq(url, extraOptions = {}) {
+function axiosReq(url, extraOptions = {}) {
   return new Promise((resolve, reject) => {
     let options = {
       useragent: "SeriesMeta",
@@ -35,14 +35,7 @@ function curlReq(url, extraOptions = {}) {
     };
 
     Object.assign(options, extraOptions);
-    // curl.request(options, function (err, data, meta) {
-    //   if (err || data == '') {
-    //     reject({error: "No valid information found in api service. Url used: " + url})
-    //   } else {
-    //     resolve(JSON.parse(data));
-    //   }
-    //   reject("Unable to contact API. Url used:" + url);
-    // });
+
     axios.get(encodeURI(url), {headers: options}).then(
       resp => {
           if (resp.status != 200 || resp.data == '') {
@@ -79,12 +72,12 @@ async function getSeries(series) {
     if (fromImdbID) {
       try {
         // Get the IMDB ID data. This is 2 API calls. The URL itself is a redirect (which curl follows).
-        dataForId = await curlReq(
+        dataForId = await axiosReq(
           `https://api.tvmaze.com/lookup/shows?imdb=${seriesLower}`
         );
 
         // Get the actual data we were looking for (3rd API call)
-        data = await curlReq(
+        data = await axiosReq(
           `https://api.tvmaze.com/shows/${dataForId.id}?embed=episodes`
         );
       } catch (error) {
@@ -93,7 +86,7 @@ async function getSeries(series) {
         );
       }
     } else {
-      data = await curlReq(
+      data = await axiosReq(
         `https://api.tvmaze.com/singlesearch/shows?q=${seriesLower}&embed=episodes`
       );
     }
