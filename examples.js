@@ -219,3 +219,12 @@ SeriesMeta.allEpisodes('Lucifer')
 // .catch((error) => {
 //   console.log(error)
 // });
+
+SeriesMeta.whenPremiered('Black Lightning')
+.then((data) => {
+  console.log(data)
+})
+.catch((error) => {
+  console.log(error)
+  console.log('The series you were looking for could not be found.')
+});
