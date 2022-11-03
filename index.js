@@ -36,16 +36,13 @@ function axiosReq(url, extraOptions = {}) {
 
     Object.assign(options, extraOptions);
 
-    axios.get(encodeURI(url), {headers: options}).then(
-      resp => {
-          if (resp.status != 200 || resp.data == '') {
-            reject({error: "No valid information found in api service. Url used: " + url})
-          } else {
+    axios.get(encodeURI(url), {headers: options})
+    .then(resp => {
             resolve(resp.data);
-          }
-          reject("Unable to contact API. Url used:" + url);
-        }
-    ) ;
+        })
+    .catch(err=>{
+      reject({error: "No valid information found in api service. Url used: " + url})
+    });
   });
 }
 
@@ -86,10 +83,14 @@ async function getSeries(series) {
         );
       }
     } else {
-      data = await axiosReq(
+          await axiosReq(
         `https://api.tvmaze.com/singlesearch/shows?q=${seriesLower}&embed=episodes`
-      );
-    }
+      )
+      .then(res=>resolve(res))
+      .catch((error) => {
+        reject(error)
+      });
+        }
 
     // Cache the data itself
     cache.set(data.name.toLowerCase(), data, 604800); // The number is 1 week in seconds.
