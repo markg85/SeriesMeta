@@ -36,7 +36,7 @@ function axiosReq(url, extraOptions = {}) {
 
     Object.assign(options, extraOptions);
 
-    axios.get(encodeURI(url), {headers: options})
+    axios.get(url, {headers: options})
     .then(resp => {
             resolve(resp.data);
         })
@@ -86,21 +86,18 @@ async function getSeries(series) {
           await axiosReq(
         `https://api.tvmaze.com/singlesearch/shows?q=${seriesLower}&embed=episodes`
       )
-      .then(res=>resolve(res))
-      .catch((error) => {
-        reject(error)
-      });
+      .then(res=>{
+        data = res
+        // Cache the data itself
+        cache.set(res.name.toLowerCase(), res, 604800); // The number is 1 week in seconds.
+        // We add a second value, this is with the IMDB ID. It merely stores the name by which to find the actual data.
+        cache.set(res.externals.imdb.toLowerCase(),{ redirect: true, series: res.name.toLowerCase() },604800); // The number is 1 week in seconds.
+        Promise.resolve(res)})
+        .catch((error) => {
+          Promise.reject(error)
+        });
         }
-
-    // Cache the data itself
-    cache.set(data.name.toLowerCase(), data, 604800); // The number is 1 week in seconds.
-
-    // We add a second value, this is with the IMDB ID. It merely stores the name by which to find the actual data.
-    cache.set(
-      data.externals.imdb.toLowerCase(),
-      { redirect: true, series: data.name.toLowerCase() },
-      604800
-    ); // The number is 1 week in seconds.
+        
   } else if (fromImdbID && "redirect" in data) {
     data = await getCacheValue(data.series);
   }
@@ -361,18 +358,19 @@ module.exports = {
 
   // This returns an object containing metadata about the current series.
   metadata: async (series) => {
-    try {
-      let data = await getSeries(series);
-      let meta = {
-        name: data.name,
-        images: data.image,
-        summary: data.summary,
-        imdb: data.externals.imdb,
-      };
-      return Promise.resolve(meta);
-    } catch (error) {
-      return Promise.reject(error);
-    }
+      await getSeries(series)
+      .then((data)=>{
+        let meta = {
+          name: data.name,
+          images: data.image,
+          summary: data.summary,
+          imdb: data.externals.imdb,
+        };
+        return Promise.resolve(meta);
+      })
+      .catch(error => {
+        return Promise.reject(error);
+      });
   },
 
   // This return an array containing all the episodes metadata

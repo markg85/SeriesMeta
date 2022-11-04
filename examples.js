@@ -230,7 +230,7 @@ SeriesMeta.allEpisodes('Lucifer')
 // });
 
 
-SeriesMeta.allEpisodes('Lucifer')
+SeriesMeta.allEpisodes('the nanny')
 .then((data) => {
   console.log(data)
 })
@@ -238,3 +238,4 @@ SeriesMeta.allEpisodes('Lucifer')
   console.log(error)
   console.log('The series you were looking for could not be found.')
 });
+
