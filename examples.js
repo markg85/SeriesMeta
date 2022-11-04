@@ -1,18 +1,18 @@
 const SeriesMeta = require('./index.js');
 
-SeriesMeta.isSeriesEnded('lucifer')
-.then((data) => {
-  if (data.ended == true) {
-    console.log(`${data.series} has ended. The last episode was aired on ${data.date}.`)
-  } else {
-    console.log(`${data.series} is still being aired.`)
-  }
-  console.log(data)
-})
-.catch((error) => {
-  console.log('The series you were looking for could not be found. ERROR :');
-  console.log(error);
-});
+// SeriesMeta.isSeriesEnded('lucifer')
+// .then((data) => {
+//   if (data.ended == true) {
+//     console.log(`${data.series} has ended. The last episode was aired on ${data.date}.`)
+//   } else {
+//     console.log(`${data.series} is still being aired.`)
+//   }
+//   console.log(data)
+// })
+// .catch((error) => {
+//   console.log('The series you were looking for could not be found. ERROR :');
+//   console.log(error);
+// });
 /*
 SeriesMeta.whenIsNext('Star Trek Discovery')
 .then((data) => {

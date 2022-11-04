@@ -357,21 +357,19 @@ module.exports = {
   },
 
   // This returns an object containing metadata about the current series.
-  metadata: async (series) => {
-      await getSeries(series)
-      .then((data)=>{
-        let meta = {
-          name: data.name,
-          images: data.image,
-          summary: data.summary,
-          imdb: data.externals.imdb,
-        };
-        return Promise.resolve(meta);
-      })
-      .catch(error => {
-        return Promise.reject(error);
-      });
-  },
+ 
+  metadata: async (series) => {    try {
+    let data = await getSeries(series);
+    const meta = {
+      name: data.name,
+      images: data.image,
+      summary: data.summary,
+      imdb: data.externals.imdb,
+    };
+    return Promise.resolve(meta);
+  } catch (error) {
+    return Promise.reject(error);
+  }},
 
   // This return an array containing all the episodes metadata
   allEpisodes: async (series) => {
